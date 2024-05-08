@@ -11,45 +11,63 @@
 # **************************************************************************** #
 
 NAME = libftprintf.a
+HEADER = includes
 
-HEADER = ft_printf.h
+LIBFT_PATH = libft/
+LIBFT_HEADER = $(LIBFT_PATH)includes
+LIBFT = $(LIBFT_PATH)libft.a
 
-COMPILER = gcc
+OBJ_DIR = obj/
+SRC_DIR = src/
+UTILS_DIR = utils/
 
-CFLAGS = -Wall -Wextra -Werror -c
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -c -I $(HEADER) -I $(LIBFT_HEADER)
 
-LIBFT_PATH =./Libft/
+MAKE = make -C
+AR = ar -crs
+RM = rm -f 
 
-MAKE = make
+SRC_FILES = ft_printf.c			ft_print_int.c 	ft_print_unsigned.c \
+						ft_print_hex.c	ft_print_ptr.c	
 
-SRC = ft_putnbr.c\
-ft_putchar.c\
-ft_putstr.c\
-ft_printf.c\
-ft_putstr.c\
-ft_print_int.c\
-ft_print_unsigned.c\
-ft_rev_str.c\
-ft_convert_base.c\
-ft_print_hex.c\
-ft_print_ptr.c
+UTILS_FILES = ft_putnbr.c		ft_putchar.c		ft_putstr.c
 
-OBJ = $(SRC:.c=.o)
+OBJ := $(addprefix $(OBJ_DIR), $(notdir $(SRC_FILES:.c=.o)))
+OBJ += $(addprefix $(OBJ_DIR), $(notdir $(UTILS_FILES:.c=.o)))
 
-LIB_OBJ = $(LIBFT_PATH:.c=.o)
+all: $(NAME)
 
-all: lib_make $(NAME)
+$(NAME): $(LIBFT) $(OBJ_DIR) $(OBJ)
+	@cp $(LIBFT) ./
+	@$(AR) $(NAME) $(OBJ)
+	@ranlib $(NAME)
+	@echo "Printf compiled!"
 
-$(NAME): $(OBJ)
-	ar cr $(NAME) $(OBJ) $(LIBFT_PATH)/*.o
+$(LIBFT):
+	@$(MAKE) $(LIBFT_PATH)
 
-lib_make:
-	$(MAKE) -C Libft/
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+$(OBJ_DIR)%.o: $(SRC_DIR)%.c
+	@echo "Compiling: $(notdir $<)"
+	@$(CC) $(CFLAGS) $< -o $@
+
+$(OBJ_DIR)%.o: $(UTILS_DIR)%.c
+	@echo "Compiling: $(notdir $<)"
+	@$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJ) $(LIBFT_PATH)/*.o
+	@$(MAKE) $(LIBFT_PATH) clean
+	@$(RM) -r $(OBJ_DIR)
+	@echo "Printf objects files cleaned!"
 
 fclean: clean
-	rm -f $(NAME) $(LIBFT_PATH)/*.o $(LIBFT_PATH)/*.a
+	@$(MAKE) $(LIBFT_PATH) fclean
+	@$(RM) *.a
+	@echo "Printf executable files cleaned!"
+
+
 
 re: fclean all
